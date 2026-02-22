@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NILTÃO IMPÉRIO</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+
+<style>
+body{
+  background:#000;
+  color:#00ff99;
+  font-family:Arial;
+  padding:15px;
+  text-align:center;
+}
+
+button{
+  background:#111;
+  color:#00ff99;
+  padding:10px;
+  margin:6px;
+  border:none;
+  border-radius:8px;
+  width:95%;
+}
+
+input{
+  width:90%;
+  padding:8px;
+  margin:4px;
+  border-radius:6px;
+  border:none;
+}
+
+.section{
+  margin-top:20px;
+  border-top:1px solid #00ff99;
+  padding-top:10px;
+}
+
+.xpbar{
+  width:100%;
+  height:15px;
+  background:#222;
+  border-radius:8px;
+}
+
+.xpfill{
+  height:100%;
+  background:#00ff99;
+  border-radius:8px;
+}
+</style>
+</head>
+<body>
+
+<h2>🔥 NILTÃO IMPÉRIO</h2>
+
+<div class="xpbar"><div class="xpfill" id="xpfill"></div></div>
+<div id="overview"></div>
+
+<div class="section">
+<h3>📚 Estudos</h3>
+<button onclick="study()">+1 Hora</button>
+<p>Total Horas: <span id="studyHours"></span></p>
+</div>
+
+<div class="section">
+<h3>💪 Físico</h3>
+<button onclick="train()">Treino Feito</button>
+<p>Total Treinos: <span id="workouts"></span></p>
+</div>
+
+<div class="section">
+<h3>💰 Financeiro</h3>
+<input type="number" id="moneyInput" placeholder="Adicionar valor">
+<button onclick="addMoney()">Adicionar</button>
+<p>Saldo: R$ <span id="money"></span></p>
+</div>
+
+<div class="section">
+<h3>🚫 Pornografia</h3>
+<button onclick="resist()">Resisti Hoje</button>
+<button onclick="relapse()">Recaída</button>
+<p>Dias Limpos: <span id="cleanDays"></span></p>
+</div>
+
+<div class="section">
+<h3>🎯 Meta 90 Dias</h3>
+<input id="goalInput" placeholder="Digite sua meta">
+<button onclick="setGoal()">Salvar Meta</button>
+<p id="goalDisplay"></p>
+</div>
+
+<div class="section">
+<h3>👑 Rank</h3>
+<p id="rank"></p>
+</div>
+
+<script>
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js');
+}
+
+let data = JSON.parse(localStorage.getItem("imperio")) || {
+  level:1,
+  xp:0,
+  studyHours:0,
+  workouts:0,
+  money:0,
+  cleanDays:0,
+  lastCheck:null,
+  goal:"",
+};
+
+function save(){
+  localStorage.setItem("imperio", JSON.stringify(data));
+}
+
+function levelUp(){
+  while(data.xp>=100){
+    data.xp-=100;
+    data.level++;
+    alert("LEVEL UP.");
+  }
+}
+
+function study(){
+  data.studyHours++;
+  data.xp+=15;
+  levelUp();
+  save();
+  render();
+}
+
+function train(){
+  data.workouts++;
+  data.xp+=20;
+  levelUp();
+  save();
+  render();
+}
+
+function addMoney(){
+  let value = Number(document.getElementById("moneyInput").value);
+  if(value>0){
+    data.money+=value;
+    data.xp+=10;
+    levelUp();
+    save();
+    render();
+  }
+}
+
+function resist(){
+  let today = new Date().toDateString();
+  if(data.lastCheck!==today){
+    data.cleanDays++;
+    data.lastCheck=today;
+    data.xp+=25;
+    levelUp();
+    save();
+    render();
+  }
+}
+
+function relapse(){
+  data.cleanDays=0;
+  alert("Recomece imediatamente.");
+  save();
+  render();
+}
+
+function setGoal(){
+  data.goal=document.getElementById("goalInput").value;
+  save();
+  render();
+}
+
+function getRank(){
+  if(data.level<5) return "Iniciante";
+  if(data.level<15) return "Guerreiro";
+  if(data.level<30) return "Construtor";
+  if(data.level<50) return "Dominador";
+  return "Imperador";
+}
+
+function render(){
+  document.getElementById("xpfill").style.width=data.xp+"%";
+  document.getElementById("overview").innerHTML=`
+  Level: ${data.level}<br>
+  XP: ${data.xp}/100
+  `;
+  document.getElementById("studyHours").innerText=data.studyHours;
+  document.getElementById("workouts").innerText=data.workouts;
+  document.getElementById("money").innerText=data.money;
+  document.getElementById("cleanDays").innerText=data.cleanDays;
+  document.getElementById("goalDisplay").innerText=data.goal;
+  document.getElementById("rank").innerText=getRank();
+}
+
+render();
+</script>
+
+</body>
+</html>
